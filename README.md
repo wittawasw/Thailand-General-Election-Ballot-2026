@@ -64,3 +64,27 @@ http://127.0.0.1:5000
 - `/negative` แสดงเฉพาะเขตที่มีอย่างน้อยหนึ่งช่องที่จำนวน 100% น้อยกว่า 94%
 - `/province/<province_id>` แสดงรายละเอียดรายจังหวัด
 - `/district/<constituency_id>` แสดงรายละเอียดรายเขตและผลคะแนนผู้สมัคร
+
+## รันด้วย Docker
+
+Docker image จะรวม `data/ballot_2569.sqlite` แต่ไม่รวมไฟล์ Excel ใน `data/`
+
+ดึง public image แล้วรัน:
+
+```bash
+docker pull wittawasw/thailand-ballot-2026:latest
+docker run --rm -p 5000:5000 wittawasw/thailand-ballot-2026:latest
+```
+
+เปิดเว็บที่:
+
+```text
+http://127.0.0.1:5000
+```
+
+สร้าง image เอง:
+
+```bash
+docker build -t thailand-ballot-2026 .
+docker run --rm -p 5000:5000 thailand-ballot-2026
+```
