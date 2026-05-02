@@ -49,7 +49,9 @@
     <tbody>
       {% for comparison in comparisons %}
         <tr>
-          <td class="number">{{ comparison["constituency_no"] }}</td>
+          <td class="number">
+            <a href="{{ url_for('district', constituency_id=comparison['constituency_id']) }}">{{ comparison["constituency_no"] }}</a>
+          </td>
           <td>{{ comparison["election_type"] }}</td>
           <td class="number">{{ comparison["turnout_94"]|comma }}</td>
           <td class="number">{{ comparison["turnout_100"]|comma }}</td>

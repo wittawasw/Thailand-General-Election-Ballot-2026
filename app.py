@@ -137,7 +137,22 @@ def negative() -> str:
 
     rows = db.execute(
         """
+        WITH constituency_winners AS (
+            SELECT
+                cr.constituency_id,
+                cand.full_name_th AS winner_name,
+                parties.name_th AS winner_party,
+                cr.votes AS winner_votes,
+                ROW_NUMBER() OVER (
+                    PARTITION BY cr.constituency_id
+                    ORDER BY cr.votes DESC, cand.full_name_th
+                ) AS winner_rank
+            FROM constituency_results cr
+            JOIN candidates cand ON cand.id = cr.candidate_id
+            LEFT JOIN parties ON parties.id = cand.party_id
+        )
         SELECT
+            c.id AS constituency_id,
             p.id AS province_id,
             p.name_th AS province_name,
             c.constituency_no,
@@ -153,10 +168,16 @@ def negative() -> str:
             bc.invalid_ballots_diff,
             bc.no_vote_ballots_94,
             bc.no_vote_ballots_100,
-            bc.no_vote_ballots_diff
+            bc.no_vote_ballots_diff,
+            cw.winner_name,
+            cw.winner_party,
+            cw.winner_votes
         FROM ballot_comparisons bc
         JOIN constituencies c ON c.id = bc.constituency_id
         JOIN provinces p ON p.id = c.province_id
+        LEFT JOIN constituency_winners cw
+            ON cw.constituency_id = c.id
+            AND cw.winner_rank = 1
         WHERE bc.turnout_diff < 0
         OR bc.valid_ballots_diff < 0
         OR bc.invalid_ballots_diff < 0
@@ -192,6 +213,7 @@ def province(province_id: int) -> str:
     comparisons = db.execute(
         """
         SELECT
+            c.id AS constituency_id,
             c.constituency_no,
             bc.election_type,
             bc.turnout_94,
@@ -237,6 +259,74 @@ def province(province_id: int) -> str:
         province=province_row,
         comparisons=comparisons,
         totals=totals,
+    )
+
+
+@app.route("/district/<int:constituency_id>")
+def district(constituency_id: int) -> str:
+    db = get_db()
+
+    district_row = db.execute(
+        """
+        SELECT
+            c.id,
+            c.constituency_no,
+            p.id AS province_id,
+            p.name_th AS province_name
+        FROM constituencies c
+        JOIN provinces p ON p.id = c.province_id
+        WHERE c.id = ?
+        """,
+        (constituency_id,),
+    ).fetchone()
+
+    if district_row is None:
+        abort(404)
+
+    comparisons = db.execute(
+        """
+        SELECT
+            election_type,
+            turnout_94,
+            turnout_100,
+            turnout_diff,
+            valid_ballots_94,
+            valid_ballots_100,
+            valid_ballots_diff,
+            invalid_ballots_94,
+            invalid_ballots_100,
+            invalid_ballots_diff,
+            no_vote_ballots_94,
+            no_vote_ballots_100,
+            no_vote_ballots_diff
+        FROM ballot_comparisons
+        WHERE constituency_id = ?
+        ORDER BY election_type
+        """,
+        (constituency_id,),
+    ).fetchall()
+
+    candidates = db.execute(
+        """
+        SELECT
+            cr.candidate_order,
+            cand.full_name_th,
+            parties.name_th AS party_name,
+            cr.votes
+        FROM constituency_results cr
+        JOIN candidates cand ON cand.id = cr.candidate_id
+        LEFT JOIN parties ON parties.id = cand.party_id
+        WHERE cr.constituency_id = ?
+        ORDER BY cr.votes DESC, cr.candidate_order
+        """,
+        (constituency_id,),
+    ).fetchall()
+
+    return render_template(
+        "district.html",
+        district=district_row,
+        comparisons=comparisons,
+        candidates=candidates,
     )
 
 

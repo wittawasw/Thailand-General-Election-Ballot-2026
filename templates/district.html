@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}{{ district["province_name"] }} เขต {{ district["constituency_no"] }}{% endblock %}
+
+{% block body %}
+  <p>
+    <a href="{{ url_for('index') }}">กลับหน้ารวม</a>
+    /
+    <a href="{{ url_for('province', province_id=district['province_id']) }}">{{ district["province_name"] }}</a>
+  </p>
+
+  <h1>{{ district["province_name"] }} เขต {{ district["constituency_no"] }}</h1>
+
+  <h2>เปรียบเทียบ 94% กับ 100%</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ประเภท</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 94%</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 100%</th>
+        <th class="number">ผลต่าง</th>
+        <th class="number">บัตรดี 94%</th>
+        <th class="number">บัตรดี 100%</th>
+        <th class="number">ผลต่าง</th>
+        <th class="number">บัตรเสีย ผลต่าง</th>
+        <th class="number">บัตรไม่เลือก ผลต่าง</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for comparison in comparisons %}
+        <tr>
+          <td>{{ comparison["election_type"] }}</td>
+          <td class="number">{{ comparison["turnout_94"]|comma }}</td>
+          <td class="number">{{ comparison["turnout_100"]|comma }}</td>
+          <td class="number nowrap {{ comparison['turnout_diff']|diff_class }}">{{ comparison["turnout_diff"]|signed_comma }}</td>
+          <td class="number">{{ comparison["valid_ballots_94"]|comma }}</td>
+          <td class="number">{{ comparison["valid_ballots_100"]|comma }}</td>
+          <td class="number nowrap {{ comparison['valid_ballots_diff']|diff_class }}">{{ comparison["valid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ comparison['invalid_ballots_diff']|diff_class }}">{{ comparison["invalid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ comparison['no_vote_ballots_diff']|diff_class }}">{{ comparison["no_vote_ballots_diff"]|signed_comma }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>ผลคะแนนผู้สมัคร</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="number">ลำดับ</th>
+        <th>ผู้สมัคร</th>
+        <th>พรรค</th>
+        <th class="number">คะแนน</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for candidate in candidates %}
+        <tr>
+          <td class="number">{{ candidate["candidate_order"] or "-" }}</td>
+          <td>{{ candidate["full_name_th"] }}</td>
+          <td>{{ candidate["party_name"] or "-" }}</td>
+          <td class="number">{{ candidate["votes"]|comma }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

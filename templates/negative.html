@@ -13,6 +13,7 @@
         <th>จังหวัด</th>
         <th class="number">เขต</th>
         <th>ประเภท</th>
+        <th class="number">คะแนนผู้ชนะ</th>
         <th class="number">ผู้มาใช้สิทธิ์ 94%</th>
         <th class="number">ผู้มาใช้สิทธิ์ 100%</th>
         <th class="number">ผลต่าง</th>
@@ -25,8 +26,11 @@
       {% for row in rows %}
         <tr>
           <td><a href="{{ url_for('province', province_id=row['province_id']) }}">{{ row["province_name"] }}</a></td>
-          <td class="number">{{ row["constituency_no"] }}</td>
+          <td class="number">
+            <a href="{{ url_for('district', constituency_id=row['constituency_id']) }}">{{ row["constituency_no"] }}</a>
+          </td>
           <td>{{ row["election_type"] }}</td>
+          <td class="number">{{ row["winner_votes"]|comma }}</td>
           <td class="number">{{ row["turnout_94"]|comma }}</td>
           <td class="number">{{ row["turnout_100"]|comma }}</td>
           <td class="number nowrap {{ row['turnout_diff']|diff_class }}">{{ row["turnout_diff"]|signed_comma }}</td>
