@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Negative Ballot Count Differences{% endblock %}
+
+{% block body %}
+  <p><a href="{{ url_for('index') }}">กลับหน้ารวม</a></p>
+  <h1>เขตที่จำนวน 100% น้อยกว่า 94%</h1>
+  <p>แสดงเฉพาะจังหวัดและเขตที่มีผลต่างติดลบอย่างน้อยหนึ่งช่อง</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>จังหวัด</th>
+        <th class="number">เขต</th>
+        <th>ประเภท</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 94%</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 100%</th>
+        <th class="number">ผลต่าง</th>
+        <th class="number">บัตรดี ผลต่าง</th>
+        <th class="number">บัตรเสีย ผลต่าง</th>
+        <th class="number">บัตรไม่เลือก ผลต่าง</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        <tr>
+          <td><a href="{{ url_for('province', province_id=row['province_id']) }}">{{ row["province_name"] }}</a></td>
+          <td class="number">{{ row["constituency_no"] }}</td>
+          <td>{{ row["election_type"] }}</td>
+          <td class="number">{{ row["turnout_94"]|comma }}</td>
+          <td class="number">{{ row["turnout_100"]|comma }}</td>
+          <td class="number nowrap {{ row['turnout_diff']|diff_class }}">{{ row["turnout_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ row['valid_ballots_diff']|diff_class }}">{{ row["valid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ row['invalid_ballots_diff']|diff_class }}">{{ row["invalid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ row['no_vote_ballots_diff']|diff_class }}">{{ row["no_vote_ballots_diff"]|signed_comma }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

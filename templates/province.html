@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ province["name_th"] }}{% endblock %}
+
+{% block body %}
+  <p><a href="{{ url_for('index') }}">กลับหน้ารวมจังหวัด</a></p>
+  <h1>{{ province["name_th"] }}: เปรียบเทียบ 94% กับ 100%</h1>
+
+  <h2>รวมจังหวัด</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>ประเภท</th>
+        <th class="number">รายการ</th>
+        <th class="number">ผู้มาใช้สิทธิ์ ผลต่าง</th>
+        <th class="number">บัตรดี ผลต่าง</th>
+        <th class="number">บัตรเสีย ผลต่าง</th>
+        <th class="number">บัตรไม่เลือก ผลต่าง</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for total in totals %}
+        <tr>
+          <td>{{ total["election_type"] }}</td>
+          <td class="number">{{ total["row_count"]|comma }}</td>
+          <td class="number nowrap {{ total['turnout_diff']|diff_class }}">{{ total["turnout_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ total['valid_ballots_diff']|diff_class }}">{{ total["valid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ total['invalid_ballots_diff']|diff_class }}">{{ total["invalid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ total['no_vote_ballots_diff']|diff_class }}">{{ total["no_vote_ballots_diff"]|signed_comma }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2>รายเขต</h2>
+  <table>
+    <thead>
+      <tr>
+        <th class="number">เขต</th>
+        <th>ประเภท</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 94%</th>
+        <th class="number">ผู้มาใช้สิทธิ์ 100%</th>
+        <th class="number">ผลต่าง</th>
+        <th class="number">บัตรดี ผลต่าง</th>
+        <th class="number">บัตรเสีย ผลต่าง</th>
+        <th class="number">บัตรไม่เลือก ผลต่าง</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for comparison in comparisons %}
+        <tr>
+          <td class="number">{{ comparison["constituency_no"] }}</td>
+          <td>{{ comparison["election_type"] }}</td>
+          <td class="number">{{ comparison["turnout_94"]|comma }}</td>
+          <td class="number">{{ comparison["turnout_100"]|comma }}</td>
+          <td class="number nowrap {{ comparison['turnout_diff']|diff_class }}">{{ comparison["turnout_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ comparison['valid_ballots_diff']|diff_class }}">{{ comparison["valid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ comparison['invalid_ballots_diff']|diff_class }}">{{ comparison["invalid_ballots_diff"]|signed_comma }}</td>
+          <td class="number nowrap {{ comparison['no_vote_ballots_diff']|diff_class }}">{{ comparison["no_vote_ballots_diff"]|signed_comma }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
